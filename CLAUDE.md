@@ -1,5 +1,9 @@
 # CLAUDE.md — whisper-edge
 
+> 🚨 **MUST READ FIRST**: 作業を始める前に [`rules/README.md`](rules/README.md) を起点に `rules/` 配下の全ファイルを読むこと。
+> `rules/` の内容は本ファイルより**優先**される（矛盾した場合は rules/ が勝つ）。
+> ルールが不明確、もしくはユーザーの依頼と矛盾する場合は、実装前に必ずユーザーに確認すること。
+
 ## プロジェクト概要
 
 ブラウザ完結のリアルタイム音声認識 SDK。**コア技術 = 軽量モデル + WebGPU/WASM 推論**。
@@ -35,8 +39,6 @@ refactoring-{name}-{description}
 - ブラウザでの動作確認（Chrome 最新 + Safari TP）
 - バンドルサイズが膨らんでいないか確認
 
-## やらないこと
+## スコープ（やる / やらない）
 
-- バックエンドサーバーの実装（このプロジェクトの本質に反する）
-- 多機能化（議事要約・話者分離など）→ 文字起こしの精度・速度・サイズに集中
-- 独自の Foundation Model 学習（Whisper / Distil-Whisper の蒸留・量子化に徹する）
+[`rules/02-scope.md`](rules/02-scope.md) を正とする。CLAUDE.md には重複記載しない。
