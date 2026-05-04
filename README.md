@@ -1,82 +1,82 @@
 # whisper-edge
 
-ブラウザ完結（WebGPU / WebAssembly）で動くリアルタイム超軽量音声認識ライブラリ。
-タブ音声を **クラウドに一切送らずに** 文字起こしできる JS SDK と、それを使った Google Meet 議事録 Chrome 拡張のリファレンス実装。
+Browser-only realtime ASR library that runs entirely on **WebGPU / WebAssembly**.
+A JavaScript SDK that transcribes tab audio **without sending a single byte to the cloud**, plus a reference Chrome extension that uses it to take Google Meet minutes.
 
 ---
 
-## 🎯 Goal: Googleに買収されること
+## 🎯 Goal: Acquisition by Google
 
-このプロジェクトは「Google による Jetpac 型 acqui-hire（2〜5人 / 技術コア + UX デモ）」をエグジット目標とする。
+This project targets a **Jetpac-style acqui-hire by Google** (2–5 person team / technical core + UX demo).
 
-**買収対象は SDK（コア技術）であり、Chrome 拡張は配布チャネル兼ショーケース。**
+**The acquisition target is the SDK (the technical core); the Chrome extension is a distribution channel and showcase.**
 
-| 想定買収先 | 統合シナリオ |
+| Likely buyer | Integration scenario |
 |---|---|
-| **Google Meet チーム** | サーバー側の文字起こし負荷をゼロにし、エンタープライズ顧客のセキュリティ懸念を解消する "ローカル文字起こしモード" |
-| **Chrome チーム** | 任意のタブ音声に対するブラウザ標準字幕 API（Live Caption の Web 版）|
-| **Workspace** | Docs/Tasks への自動アクション抽出、Driveへの議事録自動保存 |
+| **Google Meet team** | Eliminate server-side transcription cost and unblock enterprise customers' security concerns with a "local transcription mode". |
+| **Chrome team** | Browser-standard caption API for any tab audio (the web counterpart of Live Caption). |
+| **Workspace** | Auto-extract action items into Docs / Tasks; auto-archive minutes into Drive. |
 
-### 評価される技術の堀（moat）
-1. **モデルサイズ**（Whisper を 50MB 以下に量子化＋蒸留）
-2. **レイテンシ**（300ms 以内のストリーミング応答）
-3. **ブラウザでの安定動作**（WebGPU フォールバック → WASM SIMD）
-4. **多言語**（日本語の精度で勝つ）
+### Technical moat we are paid for
+1. **Model size** (Whisper distilled and quantized below 50 MB)
+2. **Latency** (streaming response under 300 ms)
+3. **Stable execution in the browser** (WebGPU primary → WASM SIMD fallback)
+4. **Multilingual quality** (winning on Japanese accuracy)
 
 ---
 
-## 技術スタック
+## Tech stack
 
-| レイヤー | 技術 |
+| Layer | Tech |
 |---|---|
-| モデル | Whisper / Distil-Whisper を ONNX 化 → INT8 量子化 |
-| 推論ランタイム | onnxruntime-web（WebGPU バックエンド優先 / WASM SIMD フォールバック） |
-| SDK | TypeScript（npm: `whisper-edge`） |
-| デモ拡張 | Chrome Manifest V3 + WebAudio API（タブキャプチャ） |
-| ベンチ | Playwright + 公開音声データセット（Common Voice 日本語など） |
+| Model | Whisper / Distil-Whisper exported to ONNX, INT8-quantized |
+| Inference runtime | onnxruntime-web (WebGPU backend preferred, WASM SIMD fallback) |
+| SDK | TypeScript (npm: `whisper-edge`) |
+| Demo extension | Chrome Manifest V3 + WebAudio API (tab capture) |
+| Benchmarks | Playwright + public speech datasets (e.g. Common Voice Japanese) |
 
 ---
 
-## ディレクトリ構成
+## Repository layout
 
 ```
 whisper-edge/
-├── src/                    # コア SDK（TypeScript）
+├── src/                    # Core SDK (TypeScript)
 ├── examples/
-│   └── meet-extension/     # Google Meet 用 Chrome 拡張デモ
-├── bench/                  # レイテンシ・精度ベンチ
-└── docs/                   # アーキテクチャ / 買収ピッチ素材
+│   └── meet-extension/     # Chrome extension demo for Google Meet
+├── bench/                  # Latency / accuracy benchmarks
+└── docs/                   # Architecture and acquisition pitch material
 ```
 
 ---
 
-## 3 フェーズ計画
+## Three-phase plan
 
-### Phase 1（〜1か月）: 技術 PoC
-- [ ] WebGPU 上で Whisper-tiny を 1 文字起こしできる
-- [ ] 日本語 5 分音声で WER < 20%
-- [ ] レイテンシ計測スクリプト
+### Phase 1 (≤ 1 month): Technical PoC
+- [ ] Run Whisper-tiny on WebGPU and produce a transcription
+- [ ] WER < 20% on five minutes of Japanese audio
+- [ ] Latency measurement script
 
-### Phase 2（〜3か月）: SDK 化
-- [ ] `whisper-edge` npm パッケージ公開
-- [ ] ストリーミング API（30秒チャンク → 部分結果）
-- [ ] Distil-Whisper への切替で 50MB 以下達成
+### Phase 2 (≤ 3 months): SDK
+- [ ] Publish the `whisper-edge` npm package
+- [ ] Streaming API (30-second chunks → partial results)
+- [ ] Switch to Distil-Whisper to stay under 50 MB
 
-### Phase 3（〜6か月）: ショーケース & 露出
-- [ ] Meet 議事録 Chrome 拡張公開（Chrome Web Store）
-- [ ] HackerNews / Product Hunt 露出
-- [ ] Google DeepMind / Workspace の関係者にデモ送付
+### Phase 3 (≤ 6 months): Showcase & exposure
+- [ ] Publish the Meet minutes Chrome extension on the Chrome Web Store
+- [ ] HackerNews / Product Hunt launch
+- [ ] Send demos to contacts at Google DeepMind / Workspace
 
 ---
 
-## 開発コマンド
+## Development commands
 
 ```bash
 npm install
-npm run dev            # SDK + デモ拡張のホットリロード
+npm run dev            # Hot reload for SDK + demo extension
 npm test
-npm run bench          # レイテンシ・WER 計測
-npm run build:ext      # Chrome 拡張の zip 生成
+npm run bench          # Latency / WER measurements
+npm run build:ext      # Produce the Chrome extension zip
 ```
 
-（実装は Phase 1 着手時に追加）
+(Implementations land when Phase 1 starts.)

@@ -1,76 +1,76 @@
-# 開発ロードマップ (12週間)
+# Roadmap (12 weeks)
 
-本ロードマップは、プロジェクトのコアであるSDKの開発から、Chrome拡張としてのデリバリー、そして買収に向けたマーケティングまでの12週間の具体的なタスクとDefinition of Done (DoD) を定義する。
+This roadmap maps out the 12-week journey from SDK development through Chrome extension delivery to acquisition-oriented marketing, with concrete tasks and Definition of Done (DoD) for each.
 
-## Phase 1: SDKコア開発とモデル最適化 (Week 1 - 4)
+## Phase 1: SDK core development and model optimization (Weeks 1–4)
 
-**目標:** ブラウザ上でWhisperが独立して動作し、指定のベンチマーク要件を満たすこと。
+**Goal:** Whisper runs standalone in the browser and meets the benchmark targets.
 
-*   **Week 1: モデルパイプラインの構築**
-    *   タスク: Whisper (tiny/base) および Distil-Whisper をONNX形式にエクスポート。ONNX Runtimeのツールチェーンを用いてINT8静的/動的量子化を実施。
-    *   DoD: 50MB以下のONNXモデルファイルが生成され、Python環境でWER劣化が2%以内に収まっていること。
-*   **Week 2: 推論エンジン (WebGPU/WASM) の実装**
-    *   タスク: `onnxruntime-web` を用いた推論ラッパークラスのTypeScript実装。Web Worker上での推論実行とメインスレッドとのメッセージング処理。
-    *   DoD: ブラウザ上でローカルの音声ファイル(.wav)を入力し、テキストが出力されること。WebGPUおよびWASMの両フォールバックが機能すること。
-*   **Week 3: 音声前処理とVADの統合**
-    *   タスク: AudioWorkletを用いた16kHzダウンサンプリング処理の実装。Silero VADの統合と有音チャンク分割ロジックの実装。
-    *   DoD: マイクからのリアルタイムストリームから有音区間のみがトリミングされ、Inference Workerへ送出されること。
-*   **Week 4: SDKのパッケージングとベンチマーク**
-    *   タスク: npmパッケージ形式へのビルド設定。自動化されたベンチマークテストの実装。
-    *   DoD: LibriSpeech (test-clean) と Common Voice (ja) を用いたテストが完走し、RTF 0.1以下、WER目標値（英語12%, 日本語18%）を達成していること。
+* **Week 1: Model pipeline**
+    * Tasks: Export Whisper (tiny/base) and Distil-Whisper to ONNX. Apply INT8 static / dynamic quantization with the ONNX Runtime toolchain.
+    * DoD: An ONNX model file ≤ 50 MB exists and shows ≤ 2% WER degradation in Python.
+* **Week 2: Inference engine (WebGPU / WASM)**
+    * Tasks: TypeScript inference wrapper around `onnxruntime-web`. Run inference on a Web Worker and message-pass with the main thread.
+    * DoD: A local `.wav` file decodes to text in the browser. Both WebGPU and WASM fallbacks work.
+* **Week 3: Audio preprocessing and VAD**
+    * Tasks: 16 kHz downsampling in an AudioWorklet. Integrate Silero VAD and chunk-splitting logic.
+    * DoD: Only voiced regions of the live mic stream are forwarded to the Inference Worker.
+* **Week 4: SDK packaging and benchmarks**
+    * Tasks: Configure the npm package build. Add automated benchmark tests.
+    * DoD: Tests on LibriSpeech (test-clean) and Common Voice (ja) finish and meet RTF ≤ 0.1, WER ≤ 12% (en) / 18% (ja).
 
-## Phase 2: Chrome拡張実装とブラウザ統合 (Week 5 - 8)
+## Phase 2: Chrome extension and browser integration (Weeks 5–8)
 
-**目標:** MV3の制約下で、Google Meetの音声をキャプチャし文字起こしする拡張機能を完成させる。
+**Goal:** Capture audio from a Google Meet tab and transcribe it inside the MV3 sandbox.
 
-*   **Week 5: MV3ボイラープレートとOffscreen実装**
-    *   タスク: Manifest V3のベース構築。Background Service WorkerからOffscreen Documentを起動・管理するライフサイクルの実装。
-    *   DoD: 拡張機能のアイコンクリックでOffscreen Documentが立ち上がり、破棄される状態管理が正しく動くこと。
-*   **Week 6: 音声キャプチャとSDKの結合**
-    *   タスク: `chrome.tabCapture` を用いてMeetタブの音声をインターセプトし、Offscreen内のSDKへMediaStreamとして渡す処理の実装。
-    *   DoD: Meetで相手が話した音声がキャプチャされ、Offscreenのコンソールに文字起こし結果が出力されること。
-*   **Week 7: Content ScriptによるMeet UIへの重畳**
-    *   タスク: MeetのDOMにReact等で字幕UIとサイドパネル（議事録一覧）をインジェクトする。
-    *   DoD: MeetのネイティブUIを破壊することなく、生成されたテキストがリアルタイムに画面上に描画されること。
-*   **Week 8: モデルキャッシュとUX改善**
-    *   タスク: IndexedDBを用いたONNXモデルのローカルキャッシュ実装。初回ロード時のプログレスバー表示。
-    *   DoD: 2回目以降の拡張機能起動時、ネットワークリクエストなしで推論エンジンが1秒以内にレディ状態になること。
+* **Week 5: MV3 boilerplate and Offscreen lifecycle**
+    * Tasks: MV3 base setup. Background Service Worker that creates and disposes the Offscreen Document.
+    * DoD: Clicking the extension icon spins up the Offscreen Document and tears it down cleanly.
+* **Week 6: Audio capture wired to the SDK**
+    * Tasks: Use `chrome.tabCapture` to intercept Meet tab audio and pass the MediaStream into the SDK inside the Offscreen Document.
+    * DoD: When someone speaks in Meet, transcribed text appears in the Offscreen console.
+* **Week 7: Content script overlay on the Meet UI**
+    * Tasks: Inject a caption overlay and side panel (minutes list) into the Meet DOM via React or similar.
+    * DoD: Transcribed text renders live on screen without breaking Meet's native UI.
+* **Week 8: Model cache and UX polish**
+    * Tasks: Cache the ONNX model in IndexedDB. Show a progress bar on first load.
+    * DoD: On second launch, the inference engine becomes ready in ≤ 1 s with no network requests.
 
-## Phase 3: パフォーマンスチューニングと公開 (Week 9 - 12)
+## Phase 3: Performance tuning and launch (Weeks 9–12)
 
-**目標:** 実運用での安定性確保、技術的アピール素材の作成、アウトリーチの開始。
+**Goal:** Production-grade stability, technical assets for outreach, begin contacting Google.
 
-*   **Week 9: プロファイリングとメモリリーク修正**
-    *   タスク: Chrome DevToolsによるヒープスナップショット分析。1時間以上の長時間の会議をシミュレートしたストレステスト。
-    *   DoD: 60分間の連続推論でメモリ使用量が一定（例: 500MB以下）に保たれ、ブラウザのクラッシュやFPS低下（10%以上）が発生しないこと。
-*   **Week 10: デモ環境 (Hugging Face Spaces) の構築**
-    *   タスク: SDK単体で動くブラウザデモアプリを作成し、Hugging Face Spacesにデプロイ。
-    *   DoD: 誰でもURLを開いてマイクを許可するだけでリアルタイム文字起こしが体験できる状態になること。
-*   **Week 11: Chrome Web Store 審査とドキュメント整備**
-    *   タスク: 拡張機能のCWSへの提出（プライバシーポリシーの作成：データ非送信の明記）。README.md / Architectureドキュメントの公開。
-    *   DoD: Chrome Web Storeで「公開」状態になり、インストール可能になること。
-*   **Week 12: マーケティングとGoogleへのアウトリーチ**
-    *   タスク: Product Huntへのローンチ。X/LinkedInでのベンチマーク結果（技術の堀）の公開。Google関係者へのダイレクトコンタクト。
-    *   DoD: 初期MAU 1,000名の達成、およびターゲットとなるGoogleエンジニア/PMから1件以上の好意的なフィードバック（またはミーティング設定）を獲得すること。
+* **Week 9: Profiling and memory leak fixes**
+    * Tasks: Heap snapshot analysis with Chrome DevTools. Stress test simulating a 1+ hour meeting.
+    * DoD: 60 minutes of continuous inference holds steady memory (e.g. ≤ 500 MB), no crashes, FPS drop stays below 10%.
+* **Week 10: Hugging Face Spaces demo**
+    * Tasks: Build a standalone browser demo of the SDK and deploy it to Hugging Face Spaces.
+    * DoD: Anyone can open the URL, allow the mic, and try realtime transcription.
+* **Week 11: Chrome Web Store review and docs**
+    * Tasks: Submit the extension to CWS (privacy policy explicitly stating no data leaves the device). Publish README and architecture docs.
+    * DoD: Extension is "Published" on the Chrome Web Store and installable.
+* **Week 12: Marketing and outreach to Google**
+    * Tasks: Product Hunt launch. Publish benchmarks (the moat) on X / LinkedIn. Direct contact with Googlers.
+    * DoD: 1,000 initial MAU and at least one positive response (or meeting) from a target Google engineer / PM.
 
 ---
 
-## 想定リスクと回避策
+## Risks and mitigations
 
-1.  **リスク:** WebGPUの環境依存による非互換性・クラッシュ。
-    *   **回避策:** 初期化時に厳密なフィーチャー検知を行い、エラーレートが高いGPUベンダ/ドライバの場合は、強制的に安定性の高いWASM (SIMD+Threads) バックエンドへフォールバックする。
-2.  **リスク:** MV3のメモリ制限によるOffscreen Documentの強制終了。
-    *   **回避策:** IndexedDBへのストリーミング保存と、30秒単位でのAudioContextおよび推論インスタンスの定期的なガベージコレクション(GC)・再生成ロジックを組み込む。
-3.  **リスク:** ONNXモデルの初期ダウンロードサイズによるUX低下。
-    *   **回避策:** ベースモデル（軽量）と高精度モデルを分け、初回はベースモデルを数十MBで即座に起動し、バックグラウンドで高精度モデルをプリフェッチする。
+1. **Risk:** WebGPU incompatibility / crashes across environments.
+    * **Mitigation:** Strict feature-detection at init. Force the safer WASM (SIMD + threads) backend when the GPU vendor / driver has a known high error rate.
+2. **Risk:** Offscreen Document killed by MV3 memory limits.
+    * **Mitigation:** Stream to IndexedDB, periodically GC and rebuild the AudioContext / inference instance every 30 seconds.
+3. **Risk:** Initial ONNX download size hurts UX.
+    * **Mitigation:** Split into a base model and a high-accuracy model. Start with the small base (tens of MB) immediately and prefetch the high-accuracy model in the background.
 
-## 技術的不確実性が高い箇所
+## Areas of high technical uncertainty
 
-*   **KVキャッシュの肥大化制御:** リアルタイムストリーミング推論において、TransformerのKVキャッシュが長時間保持されるとメモリが枯渇する。コンテキスト長をどこで切り捨てるか（WER低下とのトレードオフ）のパラメータチューニングに不確実性が残る。
-*   **MeetのDOM構造の変更:** Google MeetのDOMは頻繁に変更されるため、Content ScriptによるUIインジェクションが壊れるリスクがある。MutationObserverを用いた堅牢なアンカー探索アルゴリズムの実装が必要。
+* **KV cache growth control:** Long-running streaming inference bloats the KV cache and can starve memory. Tuning when to truncate context (against WER) carries unresolved uncertainty.
+* **Meet DOM volatility:** Google Meet's DOM changes often, which can break the content-script UI injection. We need a robust MutationObserver-based anchor search algorithm.
 
-## ベンチマーク・評価データセットの選定基準
+## Benchmark / dataset selection criteria
 
-*   **英語:** `LibriSpeech test-clean` (理想環境でのベースライン) および `test-other` (ノイズ環境での耐性評価)。
-*   **日本語:** `Mozilla Common Voice (ja)` の最新テストセット。
-*   **評価スクリプト:** Pythonの `jiwer` ライブラリを用いた標準的なWER（Word Error Rate）計算を使用し、句読点や大文字小文字の違いを正規化した上で評価する。RTFは `処理時間 / 音声の実時間` で算出する。
+* **English:** `LibriSpeech test-clean` (clean baseline) and `test-other` (noise robustness).
+* **Japanese:** Latest `Mozilla Common Voice (ja)` test set.
+* **Eval scripts:** Standard WER via Python `jiwer`, with punctuation and case normalized. RTF computed as `processing time / audio duration`.
